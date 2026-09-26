@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Bear & Cat Café (Playable Game)</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            font-family: 'Comic Sans MS', 'Chalkboard SE', 'Fredoka One', cursive, sans-serif;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #e0f7fa; /* Light cyan base outside */
+        }
+
+        #game-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            background-size: cover;
+            background-position: center;
+            transition: background 0.5s ease;
+        }
+
+        /* --- THE POSTERS (The New Realistic Touch) --- */
+        .poster-container {
+            position: absolute;
+            z-index: 1; /* Below UI, above base background */
+            pointer-events: none; /* Don't interfere with clicks */
+            display: flex;
+            gap: 20px;
+            padding: 10px;
+        }
+
+        /* Positions for different modes */
+        #customer-posters { top: 100px; left: 5%; }
+        #chef-posters     { top: 100px; right: 5%; }
+
+        .poster-image {
+            width: 160px; /* Adjust size as needed */
+            height: auto;
+            border: 8px solid white; /* Classic polaroid/framed look */
+            box-shadow: 4px 6px 12px rgba(0,0,0,0.3);
+            border-radius: 4px;
+            transition: opacity 0.5s ease;
+            filter: sepia(0.2) contrast(1.1); /* Subtle artistic filter */
+        }
+
+        .poster-image:nth-child(even) {
+            transform: rotate(-3deg);
+        }
+        .poster-image:nth-child(odd) {
+            transform: rotate(3deg);
+        }
+
+
+        /* --- UI ELEMENTS (Standard Game) --- */
+
+        /* Top Bar & Rope String UI */
+        #top-bar {
+            width: 100%;
+            height: 120px;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            z-index: 10; /* Above posters */
+        }
+
+        #rope {
+            position: absolute;
+            top: 20px;
+            width: 90%;
+            height: 4px;
+            background-color: #8d6e63;
+            border-radius: 2px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        #orders-rope-container {
+            position: absolute;
+            top: 20px;
+            width: 85%;
+            display: flex;
+            justify-content: flex-start;
+            gap: 15px;
+            padding-top: 5px;
+        }
+
+        .ticket {
+            width: 60px;
+            height: 75px;
+            background-color: #fff9c4;
+            border: 2px dashed #fbc02d;
+            box-shadow: 2px 4px 8px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+        }
+
+        .ticket::before {
+            content: '📎';
+            position: absolute;
+            top: -12px;
+            font-size: 14px;
+        }
+
+        /* Top Right UI */
+        #ui-controls {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            z-index: 20;
+        }
+
+        .keyboard-btn {
+            background-color: #f8bbd0;
+            border: 3px solid #f48fb1;
+            border-radius: 12px;
+            padding: 10px 15px;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #f06292;
+            transition: transform 0.1s, background-color 0.2s;
+        }
+
+        .keyboard-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 0 0 #f06292;
+        }
+
+        /* Stats Overlay */
+        #stats-panel {
+            position: absolute;
+            top: 15px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.85);
+            padding: 10px 18px;
+            border-radius: 20px;
+            border: 2px solid #ffb74d;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            font-weight: bold;
+            color: #5d4037;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            z-index: 20;
+        }
+
+        .stat-bar-bg {
+            width: 120px;
+            height: 12px;
+            background: #e0e0e0;
+            border-radius: 6px;
+            overflow: hidden;
+            display: inline-block;
+            vertical-align: middle;
+            margin-left: 8px;
+        }
+
+        .stat-bar-fill {
+            height: 100%;
+            width: 50%;
+            transition: width 0.3s ease;
+        }
+
+        #hunger-fill { background: #ff7043; }
+        #happiness-fill { background: #66bb6a; }
+        #patience-fill { background: #ef5350; }
+
+        /* Stage View Container */
+        #stage-view {
+            flex: 1;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            position: relative;
+            z-index: 5; /* Above posters, below UI */
+        }
+
+        /* Characters & Counter Visuals */
+        #character-sprite {
+            font-size: 130px;
+            filter: drop-shadow(0 10px 5px rgba(0,0,0,0.15));
+            transition: transform 0.3s ease, filter 0.3s ease;
+            cursor: pointer;
+            margin-bottom: -20px;
+            z-index: 2;
+        }
+
+        #counter {
+            width: 100%;
+            height: 140px;
+            background: linear-gradient(to bottom, #d7ccc8, #a1887f);
+            border-top: 12px solid #8d6e63;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            z-index: 3;
+            box-shadow: 0 -5px 15px rgba(0,0,0,0.1);
+        }
+
+        #food-plate {
+            font-size: 70px;
+            cursor: pointer;
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            animation: bounce 2s infinite;
+        }
+
+        #food-plate:hover {
+            transform: scale(1.2);
+        }
+
+        /* Keyboard Overlay Drawer */
+        #keyboard-drawer {
+            position: absolute;
+            bottom: -300px;
+            width: 100%;
+            max-width: 600px;
+            background: #fff0f5;
+            border: 4px solid #f48fb1;
+            border-top-left-radius: 25px;
+            border-top-right-radius: 25px;
+            padding: 20px;
+            box-shadow: 0 -10px 25px rgba(0,0,0,0.15);
+            transition: bottom 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            align-items: center;
+        }
+
+        #keyboard-drawer.open {
+            bottom: 0;
+        }
+
+        #order-input {
+            width: 90%;
+            padding: 12px;
+            font-size: 20px;
+            border: 2px solid #f48fb1;
+            border-radius: 12px;
+            text-align: center;
+            outline: none;
+            background: #fff;
+            color: #880e4f;
+        }
+
+        .onscreen-keyboard {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 6px;
+            width: 100%;
+        }
+
+        .key-btn {
+            background: #ffffff;
+            border: 2px solid #f8bbd0;
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #ad1457;
+            cursor: pointer;
+            box-shadow: 0 3px 0 #f48fb1;
+        }
+
+        .key-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 0 0;
+        }
+
+        .key-btn.action {
+            background: #f48fb1;
+            color: white;
+            border-color: #ec407a;
+            box-shadow: 0 3px 0 #c2185b;
+        }
+
+        /* Action Modal / Speech Bubbles */
+        #speech-bubble {
+            position: absolute;
+            top: 20%;
+            background: white;
+            border: 3px solid #5d4037;
+            border-radius: 20px;
+            padding: 15px 25px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #5d4037;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+            display: none;
+            z-index: 25;
+            text-align: center;
+            max-width: 80%;
+        }
+
+        #speech-bubble::after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 15px 15px 0;
+            border-style: solid;
+            border-color: white transparent;
+            display: block;
+            width: 0;
+        }
+
+        /* Modal Overlay for Bribe/Apology */
+        #dialog-modal {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            border: 4px solid #ff80ab;
+            border-radius: 20px;
+            padding: 25px;
+            display: none;
+            flex-direction: column;
+            gap: 15px;
+            align-items: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            z-index: 200;
+            text-align: center;
+        }
+
+        .modal-btn {
+            background: #ab47bc;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #7b1fa2;
+        }
+
+        .modal-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 0 0;
+        }
+
+        /* Animations */
+        @keyframes popIn {
+            0% { transform: scale(0) rotate(-10deg); }
+            100% { transform: scale(1) rotate(0deg); }
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        /* Dynamic background modes */
+        .outdoor-bg {
+            background: linear-gradient(to bottom, #81d4fa 60%, #a5d6a7 60%, #a5d6a7 75%, #90a4ae 75%) !important;
+        }
+
+        .indoor-bg {
+            background: linear-gradient(to bottom, #fff3e0 60%, #ffe0b2 60%) !important;
+        }
+
+        #cross-street-btn {
+            display: none;
+            position: absolute;
+            bottom: 30px;
+            background: #ff7043;
+            color: white;
+            border: 3px solid #d84315;
+            padding: 15px 30px;
+            font-size: 20px;
+            border-radius: 30px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #bf360c;
+            z-index: 10;
+        }
+    </style>
+</head>
+<body>
+
+<div id="game-container" class="indoor-bg">
+
+    <!-- THE POSTERS (The Realistic Touch) -->
+    <!-- These images will be dynamically shown based on the role -->
+    <div id="customer-posters" class="poster-container">
+        <!-- These look like actual photos/framed posters on the cafe wall -->
+        <img src="https://images.unsplash.com/photo-1541696432-82c6da8ce7bf?q=80&w=400&auto=format&fit=crop" alt="Coffee Poster" class="poster-image">
+        <img src="https://images.unsplash.com/photo-1551183053-bf91a1d81141?q=80&w=400&auto=format&fit=crop" alt="Cookie Poster" class="poster-image">
+    </div>
+
+    <div id="chef-posters" class="poster-container" style="display: none;">
+        <!-- Different posters appear when you are the chef -->
+        <img src="https://images.unsplash.com/photo-1599321957134-e81005b53946?q=80&w=400&auto=format&fit=crop" alt="Chef Pasta Poster" class="poster-image">
+        <img src="https://images.unsplash.com/photo-1520116468816-95b69f847357?q=80&w=400&auto=format&fit=crop" alt="Happy Cats Poster" class="poster-image">
+    </div>
+
+
+    <!-- UI Header -->
+    <div id="top-bar">
+        <div id="rope"></div>
+        <div id="orders-rope-container"></div>
+    </div>
+
+    <!-- UI Top Left Controls & Stats -->
+    <div id="stats-panel">
+        <div>Hunger: <div class="stat-bar-bg"><div id="hunger-fill" class="stat-bar-fill"></div></div></div>
+        <div>Happiness: <div class="stat-bar-bg"><div id="happiness-fill" class="stat-bar-fill"></div></div></div>
+        <div id="patience-container">Bear Patience: <div class="stat-bar-bg"><div id="patience-fill" class="stat-bar-fill"></div></div></div>
+        <div id="fish-counter">🐟 Fish Tips: <span id="fish-count">0</span></div>
+    </div>
+
+    <!-- UI Top Right Button -->
+    <div id="ui-controls">
+        <button class="keyboard-btn" id="toggle-keyboard-btn" title="Open Keyboard">⌨️</button>
+    </div>
+
+    <!-- Speech Bubble -->
+    <div id="speech-bubble">Welcome to the Café! Type pasta, cookies, or coffee!</div>
+
+    <!-- Main Scene Area -->
+    <div id="stage-view">
+        <div id="character-sprite">🐻‍❄️</div>
+        <div id="counter">
+            <div id="food-plate" style="display: none;">🍝</div>
+        </div>
+        <button id="cross-street-btn">🚶‍♂️ Cross the Street to Bear</button>
+    </div>
+
+    <!-- Virtual Keyboard Drawer -->
+    <div id="keyboard-drawer">
+        <input type="text" id="order-input" placeholder="Type pasta, cookies, coffee..." readonly>
+        <div class="onscreen-keyboard" id="keyboard-keys"></div>
+    </div>
+
+    <!-- Interactive Dialog Box -->
+    <div id="dialog-modal">
+        <div id="modal-text">What would you like to do?</div>
+        <div id="modal-buttons" style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;"></div>
+    </div>
+</div>
+
+<script>
+    // --- GAME STATE ---
+    const STATE = {
+        role: 'CUSTOMER', // 'CUSTOMER', 'CHEF', 'OUTDOORS'
+        hunger: 30, // 0 to 100
+        happiness: 70, // 0 to 100
+        bearPatience: 100, // 100 down to 0
+        playerPatience: 100, // For Chef Mode
+        eatenCount: 0, 
+        maxEatenLimit: 5,
+        fishCount: 0,
+        ordersOnRope: [],
+        maxOrders: 5,
+        cafeIndex: 0,
+        activeCatOrder: null,
+        gameInterval: null
+    };
+
+    const FOOD_ITEMS = {
+        'pasta': { emoji: '🍝', type: 'pasta', fill: 35, happy: 20 },
+        'spaghetti': { emoji: '🍝', type: 'pasta', fill: 35, happy: 20 },
+        'macaroni': { emoji: '🧀', type: 'pasta', fill: 30, happy: 15 },
+        'cookies': { emoji: '🍪', type: 'cookies', fill: 15, happy: 25 },
+        'cookie': { emoji: '🍪', type: 'cookies', fill: 15, happy: 25 },
+        'coffee': { emoji: '☕', type: 'coffee', fill: 5, happy: 15 },
+        'espresso': { emoji: '☕', type: 'coffee', fill: 5, happy: 15 },
+        'latte': { emoji: '☕', type: 'coffee', fill: 10, happy: 20 }
+    };
+
+    const CAT_TYPES = ['🐱', '😸', '😻', '😼', '😽', '🙀'];
+    const CAFES = ['Sunny Bean Café', 'Cozy Paw Pastry', 'Whiskers & Wheat', 'The Honeyed Bear'];
+
+    // --- DOM ELEMENTS ---
+    const container = document.getElementById('game-container');
+    const ordersRope = document.getElementById('orders-rope-container');
+    const charSprite = document.getElementById('character-sprite');
+    const foodPlate = document.getElementById('food-plate');
+    const speechBubble = document.getElementById('speech-bubble');
+    const keyboardBtn = document.getElementById('toggle-keyboard-btn');
+    const keyboardDrawer = document.getElementById('keyboard-drawer');
+    const orderInput = document.getElementById('order-input');
+    const keyboardKeysContainer = document.getElementById('keyboard-keys');
+    const crossStreetBtn = document.getElementById('cross-street-btn');
+    const dialogModal = document.getElementById('dialog-modal');
+    const modalText = document.getElementById('modal-text');
+    const modalButtons = document.getElementById('modal-buttons');
+
+    // Stats
+    const hungerFill = document.getElementById('hunger-fill');
+    const happinessFill = document.getElementById('happiness-fill');
+    const patienceFill = document.getElementById('patience-fill');
+    const patienceContainer = document.getElementById('patience-container');
+    const fishCountEl = document.getElementById('fish-count');
+
+    // Posters
+    const customerPosters = document.getElementById('customer-posters');
+    const chefPosters = document.getElementById('chef-posters');
+
+
+    // --- INITIALIZATION ---
+    function init() {
+        buildOnscreenKeyboard();
+        setupEventListeners();
+        startGameLoop();
+        render(); // Initial draw
+        speak("Welcome! Click the light pink keyboard button to type your order!", 4000);
+    }
+
+    // --- VIRTUAL KEYBOARD BUILDER ---
+    function buildOnscreenKeyboard() {
+        const layout = [
+            'Q','W','E','R','T','Y','U','I','O','P',
+            'A','S','D','F','G','H','J','K','L',
+            'Z','X','C','V','B','N','M',
+            'BACKSPACE', 'SUBMIT'
+        ];
+
+        keyboardKeysContainer.innerHTML = '';
+        layout.forEach(key => {
+            const btn = document.createElement('button');
+            btn.classList.add('key-btn');
+            if (key === 'BACKSPACE' || key === 'SUBMIT') btn.classList.add('action');
+            btn.innerText = key === 'BACKSPACE' ? '⌫' : key;
+            btn.addEventListener('click', () => handleKeyPress(key));
+            keyboardKeysContainer.appendChild(btn);
+        });
+    }
+
+    function handleKeyPress(key) {
+        if (key === 'BACKSPACE') {
+            orderInput.value = orderInput.value.slice(0, -1);
+        } else if (key === 'SUBMIT') {
+            submitOrder();
+        } else {
+            if (orderInput.value.length < 15) {
+                orderInput.value += key.toLowerCase();
+            }
+        }
+    }
+
+    // --- GAME LOOP ---
+    function startGameLoop() {
+        if (STATE.gameInterval) clearInterval(STATE.gameInterval);
+        STATE.gameInterval = setInterval(() => {
+            if (STATE.role === 'CUSTOMER') {
+                // Gets hungrier over time
+                STATE.hunger = Math.min(100, STATE.hunger + 2);
+                if (STATE.hunger >= 80) {
+                    STATE.happiness = Math.max(0, STATE.happiness - 2);
+                }
+            } else if (STATE.role === 'CHEF') {
+                // Chef mode: Player patience degrades if orders accumulate!
+                if (STATE.ordersOnRope.length > 0) {
+                    STATE.playerPatience -= 3;
+                    if (STATE.playerPatience <= 0) {
+                        triggerPlayerMad();
+                    }
+                }
+            }
+            render(); // Update visuals
+        }, 1500);
+    }
+
+    // --- ORDER & FOOD LOGIC ---
+    function submitOrder() {
+        const query = orderInput.value.trim().toLowerCase();
+        orderInput.value = '';
+        keyboardDrawer.classList.remove('open');
+
+        if (STATE.role === 'OUTDOORS') {
+            speak("You can't order food outside!");
+            return;
+        }
+
+        if (STATE.role === 'CHEF') {
+            speak("You're the chef now! Fulfill cat orders instead!");
+            return;
+        }
+
+        let foundKey = Object.keys(FOOD_ITEMS).find(k => query.includes(k));
+
+        if (foundKey) {
+            const item = FOOD_ITEMS[foundKey];
+            addOrderToRope(item);
+        } else {
+            speak("The bear chef grunts: 'We only serve Pasta, Cookies, or Coffee!'", 3000);
+        }
+    }
+
+    function addOrderToRope(item) {
+        if (STATE.ordersOnRope.length >= STATE.maxOrders) {
+            triggerBearMad("TOO MANY ORDERS AT ONCE!");
+            return;
+        }
+
+        STATE.ordersOnRope.push(item);
+        speak("Bear Chef is cooking...", 1000);
+
+        setTimeout(() => {
+            if (STATE.role === 'CUSTOMER') {
+                serveFoodToPlate(item);
+            }
+        }, 1200);
+
+        render();
+
+        if (STATE.ordersOnRope.length >= STATE.maxOrders) {
+            setTimeout(() => triggerBearMad("TOO MANY ORDERS AT ONCE!"), 800);
+        }
+    }
+
+    function serveFoodToPlate(item) {
+        foodPlate.innerText = item.emoji;
+        foodPlate.style.display = 'block';
+        foodPlate.dataset.item = JSON.stringify(item);
+        speak(`Here is your ${item.type}! Click it to eat!`, 3000);
+    }
+
+    function eatFood() {
+        const itemData = foodPlate.dataset.item;
+        if (!itemData) return;
+
+        const item = JSON.parse(itemData);
+        STATE.hunger = Math.max(0, STATE.hunger - item.fill);
+        STATE.happiness = Math.min(100, STATE.happiness + item.happy);
+
+        // Track how much food player eats
+        STATE.eatenCount++;
+        
+        // Bear patience drops with every plate eaten!
+        STATE.bearPatience = Math.max(0, 100 - (STATE.eatenCount * (100 / STATE.maxEatenLimit)));
+
+        foodPlate.style.display = 'none';
+        foodPlate.dataset.item = '';
+
+        // Remove cooked order from rope
+        if (STATE.ordersOnRope.length > 0) {
+            STATE.ordersOnRope.shift();
+        }
+
+        render();
+
+        // Check if player ate too much food
+        if (STATE.eatenCount >= STATE.maxEatenLimit || STATE.bearPatience <= 0) {
+            triggerBearMad("YOU ATE TOO MUCH FOOD!");
+        } else {
+            speak(`Yum! Delicious! (Bear Chef looks annoyed... ${STATE.eatenCount}/${STATE.maxEatenLimit} eaten)`, 2500);
+        }
+    }
+
+    // --- TRANSITIONS & MODES ---
+
+    function triggerBearMad(reason = "TOO MANY ORDERS!") {
+        STATE.role = 'CHEF';
+        STATE.ordersOnRope = [];
+        STATE.playerPatience = 100;
+
+        charSprite.innerText = '🐻‍❄️💢';
+        speak(`RAWR! ${reason} The Bear Chef got mad and stomped out!`, 4000);
+
+        setTimeout(() => {
+            speak("You are now the Chef! Serve incoming cats to earn fish tips!", 4000);
+            spawnCatCustomer();
+            render();
+        }, 2000);
+    }
+
+    function spawnCatCustomer() {
+        if (STATE.role !== 'CHEF') return;
+
+        const cat = CAT_TYPES[Math.floor(Math.random() * CAT_TYPES.length)];
+        const items = Object.keys(FOOD_ITEMS);
+        const wantedKey = items[Math.floor(Math.random() * items.length)];
+        const wantedItem = FOOD_ITEMS[wantedKey];
+
+        STATE.activeCatOrder = { cat, item: wantedItem };
+        charSprite.innerText = cat;
+
+        if (STATE.ordersOnRope.length < STATE.maxOrders) {
+            STATE.ordersOnRope.push(wantedItem);
+        }
+
+        speak(`${cat}: "Meow! I want ${wantedItem.type} ${wantedItem.emoji}!"`, 4000);
+        render();
+    }
+
+    function serveCat() {
+        if (STATE.role !== 'CHEF' || !STATE.activeCatOrder) return;
+
+        STATE.fishCount += 2; // Cat gives fish
+        speak("Meow! Thank you! 🐟 +2 Fish Tips!", 2000);
+
+        STATE.ordersOnRope.shift();
+        STATE.activeCatOrder = null;
+
+        render();
+
+        setTimeout(() => {
+            if (STATE.role === 'CHEF') spawnCatCustomer();
+        }, 2000);
+    }
+
+    function triggerPlayerMad() {
+        STATE.role = 'OUTDOORS';
+        container.className = 'outdoor-bg';
+        charSprite.innerText = '🐻‍❄️🗯️';
+        ordersRope.innerHTML = '';
+        foodPlate.style.display = 'none';
+
+        speak("ARRGH! You got overwhelmed and mad! Time to go outside and find the Bear Chef.", 4000);
+        render();
+    }
+
+    function crossStreet() {
+        speak("You crossed the street and approached the angry Bear Chef...", 3000);
+        showApologyModal();
+    }
+
+    function showApologyModal() {
+        modalText.innerText = "The Bear Chef is brooding across the street. What will you do?";
+        modalButtons.innerHTML = '';
+
+        const sorryBtn = document.createElement('button');
+        sorryBtn.classList.add('modal-btn');
+        sorryBtn.innerText = '💬 "Sorry, please come back"';
+        sorryBtn.onclick = resetGameToNewCafe;
+
+        modalButtons.appendChild(sorryBtn);
+
+        if (STATE.fishCount >= 5) {
+            const bribeBtn = document.createElement('button');
+            bribeBtn.classList.add('modal-btn');
+            bribeBtn.style.background = '#26a69a';
+            bribeBtn.innerText = '🐟 Bribe with 5 Fish Tips';
+            bribeBtn.onclick = () => {
+                STATE.fishCount -= 5;
+                resetGameToNewCafe();
+            };
+            modalButtons.appendChild(bribeBtn);
+        }
+
+        dialogModal.style.display = 'flex';
+    }
+
+    function resetGameToNewCafe() {
+        dialogModal.style.display = 'none';
+        STATE.cafeIndex = (STATE.cafeIndex + 1) % CAFES.length;
+        STATE.role = 'CUSTOMER';
+        STATE.bearPatience = 100;
+        STATE.eatenCount = 0; 
+        STATE.hunger = 40;
+        STATE.ordersOnRope = [];
+
+        container.className = 'indoor-bg';
+        charSprite.innerText = '🐻‍❄️';
+
+        speak(`The Bear runs back into the brand new ${CAFES[STATE.cafeIndex]}!`, 4000);
+        render();
+    }
+
+    // --- UI RENDER & POSTER VISIBILITY ---
+    function render() {
+        hungerFill.style.width = STATE.hunger + '%';
+        happinessFill.style.width = STATE.happiness + '%';
+        fishCountEl.innerText = STATE.fishCount;
+
+        // Poster visibility based on role
+        if (STATE.role === 'CUSTOMER') {
+            customerPosters.style.display = 'flex';
+            chefPosters.style.display = 'none';
+
+            patienceContainer.style.display = 'block';
+            patienceFill.style.width = STATE.bearPatience + '%';
+            crossStreetBtn.style.display = 'none';
+        } else if (STATE.role === 'CHEF') {
+            customerPosters.style.display = 'none';
+            chefPosters.style.display = 'flex';
+
+            patienceContainer.style.display = 'block';
+            patienceFill.style.width = STATE.playerPatience + '%';
+            crossStreetBtn.style.display = 'none';
+        } else {
+            // Outdoor / Outside Café
+            customerPosters.style.display = 'none';
+            chefPosters.style.display = 'none';
+
+            patienceContainer.style.display = 'none';
+            crossStreetBtn.style.display = 'block';
+        }
+
+        // Tickets on Rope
+        ordersRope.innerHTML = '';
+        STATE.ordersOnRope.forEach(item => {
+            const ticket = document.createElement('div');
+            ticket.classList.add('ticket');
+            ticket.innerText = item.emoji;
+            ordersRope.appendChild(ticket);
+        });
+    }
+
+    function speak(text, duration = 3000) {
+        speechBubble.innerText = text;
+        speechBubble.style.display = 'block';
+        clearTimeout(speechBubble.dataset.timeout);
+        speechBubble.dataset.timeout = setTimeout(() => {
+            speechBubble.style.display = 'none';
+        }, duration);
+    }
+
+    function setupEventListeners() {
+        keyboardBtn.addEventListener('click', () => {
+            if (STATE.role === 'OUTDOORS') {
+                showApologyModal();
+            } else {
+                keyboardDrawer.classList.toggle('open');
+            }
+        });
+
+        foodPlate.addEventListener('click', eatFood);
+
+        charSprite.addEventListener('click', () => {
+            if (STATE.role === 'CHEF' && STATE.activeCatOrder) {
+                serveCat();
+            } else if (STATE.role === 'OUTDOORS') {
+                showApologyModal();
+            }
+        });
+
+        crossStreetBtn.addEventListener('click', crossStreet);
+    }
+
+    window.onload = init;
+</script>
+</body>
+</html>
