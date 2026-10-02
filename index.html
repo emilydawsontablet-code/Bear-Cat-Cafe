@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Bear & Cat Café (Cartoon Poster Edition)</title>
+    <title>The Bear & Cat Café (Embedded Cartoon Edition)</title>
     <style>
         * {
             box-sizing: border-box;
@@ -182,7 +182,7 @@
         }
 
         #hunger-fill { background: #ff7043; }
-       #happiness-fill { background: #66bb6a; }
+        #happiness-fill { background: #66bb6a; }
         #patience-fill { background: #ef5350; }
 
         /* Stage View Container */
@@ -239,7 +239,7 @@
             max-width: 600px;
             background: #fff0f5;
             border: 4px solid #f48fb1;
-           border-top-left-radius: 25px;
+            border-top-left-radius: 25px;
             border-top-right-radius: 25px;
             padding: 20px;
             box-shadow: 0 -10px 25px rgba(0,0,0,0.15);
@@ -407,18 +407,66 @@
 
 <div id="game-container" class="indoor-bg">
 
-    <!-- THE CARTOON POSTERS (The Fussy, Cohesive Touch) -->
-    <!-- These images will be dynamically shown based on the role -->
+    <!-- THE POSTERS (Embedded Vector Cartoon Style) -->
+    <!-- We are using SVG data embedded directly so they will always load -->
     <div id="customer-posters" class="poster-container">
-        <!-- New cartoon vector art posters -->
-        <img src="https://cdna.artstation.com/p/assets/images/images/027/737/838/large/fussy-cozy-cartoon-coffee-shop-poster.jpg" alt="Cartoon Cozy Coffee Poster" class="poster-image">
-        <img src="https://cdna.artstation.com/p/assets/images/images/027/737/840/large/fussy-cozy-cartoon-cookie-poster.jpg" alt="Cartoon Cookie Poster" class="poster-image">
+        <!-- Cartoon Coffee Poster (Embedded SVG) -->
+        <div class="poster-image">
+            <svg viewBox="0 0 200 250" xmlns="http://www.w3.org/2000/svg">
+                <rect width="200" height="250" fill="#f8bbd0" rx="10"/>
+                <text x="100" y="40" font-family="cursive" font-size="24" text-anchor="middle" fill="#880e4f">COZY BEAN</text>
+                <path d="M70 100 C 70 80, 130 80, 130 100 L 125 180 C 125 190, 75 190, 75 180 Z" fill="#6d4c41"/>
+                <path d="M130 110 C 150 110, 150 150, 130 150" stroke="#6d4c41" stroke-width="8" fill="none"/>
+                <path d="M90 70 Q 95 50, 100 70 T 110 70" stroke="#fff" stroke-width="3" fill="none" opacity="0.8"/>
+                <text x="100" y="230" font-family="sans-serif" font-size="16" text-anchor="middle" fill="#880e4f">CAFE DAILY</text>
+            </svg>
+        </div>
+        <!-- Cartoon Cookie Poster (Embedded SVG) -->
+        <div class="poster-image">
+            <svg viewBox="0 0 200 250" xmlns="http://www.w3.org/2000/svg">
+                <rect width="200" height="250" fill="#ffe082" rx="10"/>
+                <text x="100" y="40" font-family="cursive" font-size="24" text-anchor="middle" fill="#bf360c">FRESH!</text>
+                <circle cx="100" y="130" r="70" fill="#d2b48c"/>
+                <circle cx="70" y="100" r="8" fill="#5d4037"/>
+                <circle cx="130" y="110" r="8" fill="#5d4037"/>
+                <circle cx="100" y="160" r="8" fill="#5d4037"/>
+                <circle cx="80" y="150" r="8" fill="#5d4037"/>
+                <circle cx="120" y="140" r="8" fill="#5d4037"/>
+                <text x="100" y="230" font-family="sans-serif" font-size="16" text-anchor="middle" fill="#bf360c">CHOC-CHIP</text>
+            </svg>
+        </div>
     </div>
 
     <div id="chef-posters" class="poster-container" style="display: none;">
-        <!-- Different fussy posters appear when you are the chef -->
-        <img src="https://cdna.artstation.com/p/assets/images/images/027/737/842/large/fussy-cozy-cartoon-pasta-chef-poster.jpg" alt="Cartoon Chef Pasta Poster" class="poster-image">
-        <img src="https://cdna.artstation.com/p/assets/images/images/027/737/844/large/fussy-cozy-cartoon-cats-eating-pasta-poster.jpg" alt="Cartoon Happy Cats Poster" class="poster-image">
+        <!-- Cartoon Pasta Poster (Embedded SVG) -->
+        <div class="poster-image">
+            <svg viewBox="0 0 200 250" xmlns="http://www.w3.org/2000/svg">
+                <rect width="200" height="250" fill="#a5d6a7" rx="10"/>
+                <text x="100" y="40" font-family="cursive" font-size="24" text-anchor="middle" fill="#1b5e20">PASTA TUESDAY</text>
+                <ellipse cx="100" y="140" rx="80" ry="30" fill="#fff"/>
+                <path d="M50 130 C 60 110, 80 110, 90 130 S 110 150, 130 130 S 150 110, 160 130" stroke="#fbc02d" stroke-width="5" fill="none"/>
+                <path d="M45 135 C 55 115, 75 115, 85 135 S 105 155, 125 135 S 145 115, 155 135" stroke="#fbc02d" stroke-width="5" fill="none"/>
+                <circle cx="100" y="130" r="15" fill="#e53935"/>
+                <text x="100" y="230" font-family="sans-serif" font-size="16" text-anchor="middle" fill="#1b5e20">ORDER NOW</text>
+            </svg>
+        </div>
+        <!-- Cartoon Pasta Cat Poster (Embedded SVG) -->
+        <div class="poster-image">
+            <svg viewBox="0 0 200 250" xmlns="http://www.w3.org/2000/svg">
+                <rect width="200" height="250" fill="#81d4fa" rx="10"/>
+                <text x="100" y="40" font-family="cursive" font-size="24" text-anchor="middle" fill="#01579b">CAT APPROVED</text>
+                <!-- Cartoon Cat Head -->
+                <circle cx="100" y="130" r="50" fill="#bdbdbd"/>
+                <polygon points="60,90 80,50 100,90" fill="#bdbdbd"/>
+                <polygon points="140,90 120,50 100,90" fill="#bdbdbd"/>
+                <circle cx="80" y="120" r="5" fill="#000"/>
+                <circle cx="120" y="120" r="5" fill="#000"/>
+                <polygon points="100,140 95,130 105,130" fill="#e57373"/>
+                <!-- Noodle -->
+                <path d="M100 150 Q 110 180, 100 210" stroke="#fbc02d" stroke-width="4" fill="none"/>
+                <text x="100" y="230" font-family="sans-serif" font-size="16" text-anchor="middle" fill="#01579b">MEOW-GHEETI</text>
+            </svg>
+        </div>
     </div>
 
 
