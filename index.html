@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Bear & Cat Café (Embedded Cartoon Edition)</title>
+    <title>The Bear & Cat Café (Keyboard Edition)</title>
     <style>
         * {
             box-sizing: border-box;
@@ -33,7 +33,7 @@
             transition: background 0.5s ease;
         }
 
-        /* --- THE POSTERS (The Fussy, Cozy Cartoon Touch) --- */
+        /* --- THE POSTERS (Embedded Vector Cartoon Style) --- */
         .poster-container {
             position: absolute;
             z-index: 1; /* Below UI, above base background */
@@ -577,6 +577,7 @@
     function init() {
         buildOnscreenKeyboard();
         setupEventListeners();
+        setupPhysicalKeyboard(); // <--- NEW Physical Keyboard Logic
         startGameLoop();
         render(); // Initial draw
         speak("Welcome! Click the light pink keyboard button to type your order!", 4000);
@@ -597,12 +598,13 @@
             btn.classList.add('key-btn');
             if (key === 'BACKSPACE' || key === 'SUBMIT') btn.classList.add('action');
             btn.innerText = key === 'BACKSPACE' ? '⌫' : key;
-            btn.addEventListener('click', () => handleKeyPress(key));
+            btn.addEventListener('click', () => handleVirtualKeyPress(key));
             keyboardKeysContainer.appendChild(btn);
         });
     }
 
-    function handleKeyPress(key) {
+    // Handle Input from Onscreen Fussy Buttons
+    function handleVirtualKeyPress(key) {
         if (key === 'BACKSPACE') {
             orderInput.value = orderInput.value.slice(0, -1);
         } else if (key === 'SUBMIT') {
@@ -613,6 +615,33 @@
             }
         }
     }
+
+    // --- NEW: PHYSICAL KEYBOARD LOGIC ---
+    function setupPhysicalKeyboard() {
+        window.addEventListener('keydown', (event) => {
+            // Only capture keyboard if the drawer is actually open
+            if (!keyboardDrawer.classList.contains('open')) return;
+
+            const input = orderInput;
+
+            // Handle functional keys
+            if (event.key === 'Backspace') {
+                event.preventDefault(); // Prevent standard browser back navigation
+                handleVirtualKeyPress('BACKSPACE');
+            } else if (event.key === 'Enter') {
+                handleVirtualKeyPress('SUBMIT');
+            } else if (event.key === 'Escape') {
+                toggleKeyboard(); // Close drawer on Escape
+            }
+            // Handle alphabetical keys (A-Z)
+            else if (event.key.length === 1 && event.key.match(/[a-zA-Z]/)) {
+                if (input.value.length < 15) {
+                    input.value += event.key.toLowerCase();
+                }
+            }
+        });
+    }
+
 
     // --- GAME LOOP ---
     function startGameLoop() {
@@ -641,7 +670,7 @@
     function submitOrder() {
         const query = orderInput.value.trim().toLowerCase();
         orderInput.value = '';
-        keyboardDrawer.classList.remove('open');
+        keyboardDrawer.classList.remove('open'); // Always close after submit
 
         if (STATE.role === 'OUTDOORS') {
             speak("You can't order food outside!");
@@ -834,6 +863,25 @@
         render();
     }
 
+    // --- UI HELPERS ---
+
+    function toggleKeyboard() {
+        if (STATE.role === 'OUTDOORS') {
+            showApologyModal();
+        } else {
+            keyboardDrawer.classList.toggle('open');
+        }
+    }
+
+    function speak(text, duration = 3000) {
+        speechBubble.innerText = text;
+        speechBubble.style.display = 'block';
+        clearTimeout(speechBubble.dataset.timeout);
+        speechBubble.dataset.timeout = setTimeout(() => {
+            speechBubble.style.display = 'none';
+        }, duration);
+    }
+
     // --- UI RENDER & POSTER VISIBILITY ---
     function render() {
         hungerFill.style.width = STATE.hunger + '%';
@@ -874,23 +922,8 @@
         });
     }
 
-    function speak(text, duration = 3000) {
-        speechBubble.innerText = text;
-        speechBubble.style.display = 'block';
-        clearTimeout(speechBubble.dataset.timeout);
-        speechBubble.dataset.timeout = setTimeout(() => {
-            speechBubble.style.display = 'none';
-        }, duration);
-    }
-
     function setupEventListeners() {
-        keyboardBtn.addEventListener('click', () => {
-            if (STATE.role === 'OUTDOORS') {
-                showApologyModal();
-            } else {
-                keyboardDrawer.classList.toggle('open');
-            }
-        });
+        keyboardBtn.addEventListener('click', toggleKeyboard);
 
         foodPlate.addEventListener('click', eatFood);
 
