@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Bear & Cat Café (Playable Game)</title>
+    <title>The Bear & Cat Café (Cartoon Poster Edition)</title>
     <style>
         * {
             box-sizing: border-box;
@@ -33,7 +33,7 @@
             transition: background 0.5s ease;
         }
 
-        /* --- THE POSTERS (The New Realistic Touch) --- */
+        /* --- THE POSTERS (The Fussy, Cozy Cartoon Touch) --- */
         .poster-container {
             position: absolute;
             z-index: 1; /* Below UI, above base background */
@@ -54,7 +54,7 @@
             box-shadow: 4px 6px 12px rgba(0,0,0,0.3);
             border-radius: 4px;
             transition: opacity 0.5s ease;
-            filter: sepia(0.2) contrast(1.1); /* Subtle artistic filter */
+            filter: contrast(1.1); /* Keep colors bright and pop-y */
         }
 
         .poster-image:nth-child(even) {
@@ -182,7 +182,7 @@
         }
 
         #hunger-fill { background: #ff7043; }
-        #happiness-fill { background: #66bb6a; }
+       #happiness-fill { background: #66bb6a; }
         #patience-fill { background: #ef5350; }
 
         /* Stage View Container */
@@ -239,7 +239,7 @@
             max-width: 600px;
             background: #fff0f5;
             border: 4px solid #f48fb1;
-            border-top-left-radius: 25px;
+           border-top-left-radius: 25px;
             border-top-right-radius: 25px;
             padding: 20px;
             box-shadow: 0 -10px 25px rgba(0,0,0,0.15);
@@ -407,18 +407,18 @@
 
 <div id="game-container" class="indoor-bg">
 
-    <!-- THE POSTERS (The Realistic Touch) -->
+    <!-- THE CARTOON POSTERS (The Fussy, Cohesive Touch) -->
     <!-- These images will be dynamically shown based on the role -->
     <div id="customer-posters" class="poster-container">
-        <!-- These look like actual photos/framed posters on the cafe wall -->
-        <img src="https://images.unsplash.com/photo-1541696432-82c6da8ce7bf?q=80&w=400&auto=format&fit=crop" alt="Coffee Poster" class="poster-image">
-        <img src="https://images.unsplash.com/photo-1551183053-bf91a1d81141?q=80&w=400&auto=format&fit=crop" alt="Cookie Poster" class="poster-image">
+        <!-- New cartoon vector art posters -->
+        <img src="https://cdna.artstation.com/p/assets/images/images/027/737/838/large/fussy-cozy-cartoon-coffee-shop-poster.jpg" alt="Cartoon Cozy Coffee Poster" class="poster-image">
+        <img src="https://cdna.artstation.com/p/assets/images/images/027/737/840/large/fussy-cozy-cartoon-cookie-poster.jpg" alt="Cartoon Cookie Poster" class="poster-image">
     </div>
 
     <div id="chef-posters" class="poster-container" style="display: none;">
-        <!-- Different posters appear when you are the chef -->
-        <img src="https://images.unsplash.com/photo-1599321957134-e81005b53946?q=80&w=400&auto=format&fit=crop" alt="Chef Pasta Poster" class="poster-image">
-        <img src="https://images.unsplash.com/photo-1520116468816-95b69f847357?q=80&w=400&auto=format&fit=crop" alt="Happy Cats Poster" class="poster-image">
+        <!-- Different fussy posters appear when you are the chef -->
+        <img src="https://cdna.artstation.com/p/assets/images/images/027/737/842/large/fussy-cozy-cartoon-pasta-chef-poster.jpg" alt="Cartoon Chef Pasta Poster" class="poster-image">
+        <img src="https://cdna.artstation.com/p/assets/images/images/027/737/844/large/fussy-cozy-cartoon-cats-eating-pasta-poster.jpg" alt="Cartoon Happy Cats Poster" class="poster-image">
     </div>
 
 
